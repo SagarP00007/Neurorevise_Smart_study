@@ -8,6 +8,7 @@ import 'package:study_smart/core/router/app_router.dart';
 import 'package:study_smart/core/theme/app_theme.dart';
 import 'package:study_smart/core/utils/service_locator.dart';
 import 'package:study_smart/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:study_smart/features/study_items/presentation/viewmodels/revision_viewmodel.dart';
 import 'package:study_smart/features/study_items/presentation/viewmodels/study_viewmodel.dart';
 import 'package:study_smart/firebase_options.dart';
 
@@ -57,12 +58,9 @@ class StudySmartApp extends StatelessWidget {
         ChangeNotifierProvider<StudyViewModel>(
           create: (_) => sl<StudyViewModel>()..loadDecks(),
         ),
-        // Add future ViewModels here:
-
-        // ChangeNotifierProvider(create: (_) => sl<PlannerViewModel>()),
-        // ChangeNotifierProvider(create: (_) => sl<NotesViewModel>()),
-        // ChangeNotifierProvider(create: (_) => sl<FlashcardsViewModel>()),
-        // ChangeNotifierProvider(create: (_) => sl<AnalyticsViewModel>()),
+        ChangeNotifierProvider<RevisionViewModel>(
+          create: (_) => sl<RevisionViewModel>(),
+        ),
       ],
       child: Builder(builder: (context) {
         return MaterialApp.router(

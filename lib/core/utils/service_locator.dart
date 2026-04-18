@@ -9,9 +9,13 @@ import 'package:study_smart/features/auth/domain/usecases/auth_usecases.dart';
 import 'package:study_smart/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:study_smart/features/study_items/data/datasources/study_local_datasource.dart';
 import 'package:study_smart/features/study_items/data/datasources/study_remote_datasource.dart';
+import 'package:study_smart/features/study_items/data/repositories/revision_repository_impl.dart';
 import 'package:study_smart/features/study_items/data/repositories/study_repository_impl.dart';
+import 'package:study_smart/features/study_items/data/services/revision_firestore_service.dart';
+import 'package:study_smart/features/study_items/domain/repositories/revision_repository.dart';
 import 'package:study_smart/features/study_items/domain/repositories/study_repository.dart';
 import 'package:study_smart/features/study_items/domain/usecases/study_usecases.dart';
+import 'package:study_smart/features/study_items/presentation/viewmodels/revision_viewmodel.dart';
 import 'package:study_smart/features/study_items/presentation/viewmodels/study_viewmodel.dart';
 import 'package:get_it/get_it.dart';
 
@@ -84,6 +88,25 @@ Future<void> setupDependencies() async {
       getItemsByDeckUseCase: sl(),
       addItemUseCase: sl(),
       repository: sl(),
+    ),
+  );
+
+  // ── Revisions ──────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<RevisionFirestoreService>(
+    () => RevisionFirestoreService(firestoreService: sl()),
+  );
+  sl.registerLazySingleton<RevisionRepository>(
+    () => RevisionRepositoryImpl(
+      revisionService: sl(),
+      authRepository: sl(),
+    ),
+  );
+  sl.registerLazySingleton(() => CompleteRevisionUseCase(sl()));
+
+  sl.registerFactory(
+    () => RevisionViewModel(
+      repository: sl(),
+      completeRevisionUseCase: sl(),
     ),
   );
 }
