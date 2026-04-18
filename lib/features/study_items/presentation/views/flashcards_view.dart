@@ -182,7 +182,7 @@ class _FlashcardsViewState extends State<FlashcardsView> {
     AppTheme.primary,
     AppTheme.secondary,
     AppTheme.warning,
-    AppTheme.accent,
+    AppTheme.error,
     Color(0xFF8E44AD),
     Color(0xFF2980B9),
     Color(0xFF27AE60),
@@ -441,7 +441,7 @@ class _FlashcardStudyScreenState extends State<_FlashcardStudyScreen>
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _NavButton(icon: Icons.arrow_back_rounded, onTap: _prev, enabled: _index > 0),
-                _NavButton(icon: Icons.close_rounded, onTap: () {}, color: AppTheme.accent),
+                _NavButton(icon: Icons.close_rounded, onTap: () {}, color: AppTheme.error),
                 _NavButton(icon: Icons.check_rounded, onTap: () {}, color: AppTheme.secondary),
                 _NavButton(icon: Icons.arrow_forward_rounded, onTap: _next, enabled: _index < _cards.length - 1),
               ],

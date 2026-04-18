@@ -42,6 +42,7 @@ dependencies:
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
   lottie: ^3.1.0
+  flutter_cube: ^0.1.1       # Real 3D OBJ model renderer
   percent_indicator: ^4.2.3
   intl: ^0.19.0
 
@@ -69,6 +70,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/animations/
+    - assets/models/          # OBJ + MTL files for flutter_cube
 
   # fonts:   # Uncomment after adding font files to assets/fonts/
   #   - family: Inter

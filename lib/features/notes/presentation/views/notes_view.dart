@@ -13,7 +13,7 @@ class _NotesViewState extends State<NotesView> {
     _Note(title: 'Binary Search Trees', subject: 'CS', preview: 'A BST is a tree data structure in which each node has at most two children...', color: AppTheme.primary),
     _Note(title: 'Integration by Parts', subject: 'Math', preview: '∫u dv = uv − ∫v du. Use LIATE to choose u: Log, Inverse, Algebraic...', color: AppTheme.secondary),
     _Note(title: 'Krebs Cycle', subject: 'Biology', preview: 'The citric acid cycle produces 2 ATP, 6 NADH, 2 FADH2 per glucose molecule...', color: AppTheme.warning),
-    _Note(title: 'Organic Chemistry Reactions', subject: 'Chemistry', preview: 'SN1 reactions proceed via carbocation intermediate, rates depend on substrate...', color: AppTheme.accent),
+    _Note(title: 'Organic Chemistry Reactions', subject: 'Chemistry', preview: 'SN1 reactions proceed via carbocation intermediate, rates depend on substrate...', color: AppTheme.error),
   ];
 
   String _search = '';
