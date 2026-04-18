@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Hierarchical Security: Standard queries and document reads/writes
+    // Because all data is nested under /users/{userId}/..., this single rule 
+    // secures everything. An authenticated user can only access documents where 
+    // the top-level path matches their own authentication UID.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 2. Collection Group Security: 'items'
+    // To support cross-deck queries (watchDueItemsAcrossDecks), the app uses a 
+    // collectionGroup query. Firestore requires explicit rules for collection 
+    // groups because they bypass the hierarchical path rules above.
+    // This ensures that the user can only fetch an item if the document's 
+    // internal 'userId' field exactly matches their UID.
+    match /{path=**}/items/{itemId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    // 3. Collection Group Security: 'revisions'
+    // Similar to items, the dashboard queries all revisions due today across 
+    // all decks (watchDueRevisions). This rule guarantees users cannot fetch 
+    // other users' revision schedules.
+    match /{path=**}/revisions/{revisionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+  }
+}

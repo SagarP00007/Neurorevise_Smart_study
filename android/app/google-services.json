@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "431784510650",
+    "project_id": "study-smart-bccfa",
+    "storage_bucket": "study-smart-bccfa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431784510650:android:94ab6a3c348f131c996e83",
+        "android_client_info": {
+          "package_name": "com.studysmart.study_smart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEUQJu5SJmVBkEu3u8gPxbH8Zn0wcHQbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
