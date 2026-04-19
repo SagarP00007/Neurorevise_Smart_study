@@ -4,41 +4,42 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Global dark futuristic theme for Study Smart.
 ///
-/// Palette built around a deep navy background (#0B0F1A) with
-/// a neon-blue primary accent (#00D4FF) and subtle cyan secondary.
+/// Palette matches the AI Study Companion reference design:
+///   Background: #090D1A (near-black navy)
+///   Accent:     #4A78F5 (electric blue)
 class AppTheme {
   AppTheme._();
 
-  // ── Color Palette ─────────────────────────────────────────────────────────
+  // ── Color Palette ────────────────────────────────────────────────────────
 
-  /// Neon blue — primary accent for interactive elements.
-  static const Color primary       = Color(0xFF00D4FF);
-  static const Color primaryGlow   = Color(0xFF00A8CC); // slightly darker for pressed states
-  static const Color primaryDark   = Color(0xFF007A99); // deep variant for gradients
+  /// Electric blue — primary accent (matches reference design).
+  static const Color primary       = Color(0xFF4A78F5);
+  static const Color primaryGlow   = Color(0xFF3D6AE0);
+  static const Color primaryDark   = Color(0xFF1E3FA8);
 
-  /// Cyan-teal — secondary / success accent.
-  static const Color secondary     = Color(0xFF00FFD1);
-  static const Color secondaryDark = Color(0xFF00BFA5);
+  /// Bright cyan — secondary / AI ring highlight.
+  static const Color secondary     = Color(0xFF00C6FF);
+  static const Color secondaryDark = Color(0xFF0099CC);
 
-  /// Highlight / warning.
+  /// Warning amber.
   static const Color warning       = Color(0xFFFFB347);
 
   /// Error / destructive.
   static const Color error         = Color(0xFFFF4D6D);
 
-  // ── Background & Surface ──────────────────────────────────────────────────
+  // ── Background & Surface ────────────────────────────────────────────
 
-  /// Deepest background — canvas colour.
-  static const Color bgDark        = Color(0xFF0B0F1A);
+  /// Deepest background — #090D1A.
+  static const Color bgDark        = Color(0xFF090D1A);
 
-  /// Slightly elevated surface (app-bar, bottom-nav, drawers).
-  static const Color surfaceDark   = Color(0xFF111827);
+  /// App-bar / bottom-nav surface.
+  static const Color surfaceDark   = Color(0xFF0F1322);
 
-  /// Card / sheet surface.
-  static const Color cardDark      = Color(0xFF1A2235);
+  /// Card surface.
+  static const Color cardDark      = Color(0xFF141929);
 
   /// Elevated card (modals, overlays).
-  static const Color cardHighDark  = Color(0xFF1E2A40);
+  static const Color cardHighDark  = Color(0xFF1A2035);
 
   /// Subtle divider / border.
   static const Color borderDark    = Color(0xFF243048);

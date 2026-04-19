@@ -13,10 +13,11 @@ import 'package:study_smart/features/notes/presentation/views/notes_view.dart';
 import 'package:study_smart/features/planner/presentation/views/planner_view.dart';
 import 'package:study_smart/features/study_items/domain/entities/deck_entity.dart';
 import 'package:study_smart/core/widgets/app_shell.dart';
+import 'package:study_smart/features/onboarding/presentation/views/onboarding_view.dart';
 
 class AppRouter {
   static GoRouter router(AuthViewModel authViewModel) => GoRouter(
-        initialLocation: RouteNames.dashboard,
+        initialLocation: RouteNames.onboarding,
         debugLogDiagnostics: true,
         refreshListenable: authViewModel,
         redirect: (context, state) {
@@ -33,6 +34,16 @@ class AppRouter {
           return null;
         },
         routes: [
+          // ── Onboarding ───────────────────────────────────────────────────
+          GoRoute(
+            path: RouteNames.onboarding,
+            name: RouteNames.onboarding,
+            pageBuilder: (context, state) => AppTransitions.fadeScale(
+              pageKey: state.pageKey,
+              child: const OnboardingView(),
+            ),
+          ),
+
           // ── Auth ──────────────────────────────────────────────────────────
           // slideRight: feels like entering a new area of the app.
           GoRoute(
