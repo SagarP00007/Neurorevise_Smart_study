@@ -219,7 +219,7 @@ class _ButtonShell extends StatelessWidget {
           gradient: LinearGradient(
             colors: [
               color,
-              Color.lerp(color, Colors.blue.shade900, 0.45)!,
+              Color.lerp(color, AppTheme.primaryDark, 0.50)!,
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

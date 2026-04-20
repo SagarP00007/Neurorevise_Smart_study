@@ -120,14 +120,14 @@ class _GlowBackgroundState extends State<GlowBackground>
               opacity: 0.14 * _pulse.value,
             ),
 
-            // ── Tertiary deep-blue orb (centre) — very faint depth layer ──
+            // ── Tertiary dark-orange orb (centre) ──────────────────────────────
             _GlowOrb(
               size: size,
-              color: const Color(0xFF0055FF),
+              color: const Color(0xFF7A1A00),
               cx: 0.5 + 0.06 * math.cos(_drift.value + math.pi / 2),
               cy: 0.48 + 0.06 * math.sin(_drift.value + math.pi / 2),
               radiusFactor: 0.65,
-              opacity: 0.07 * _pulse.value,
+              opacity: 0.06 * _pulse.value,
             ),
 
             // ── Vignette overlay — pinches edges darker for depth ──────────
@@ -159,9 +159,9 @@ class _BaseGradient extends StatelessWidget {
           center: Alignment(-0.3, -0.5),
           radius: 1.4,
           colors: [
-            Color(0xFF0D1526), // slightly lighter navy at focal point
-            Color(0xFF0B0F1A), // deep bgDark at edges
-            Color(0xFF070A12), // near-black for vignette cooperation
+            Color(0xFF252527), // slightly lighter charcoal at focal point
+            Color(0xFF1C1C1E), // bgDark
+            Color(0xFF111113), // near-black edges
           ],
           stops: [0.0, 0.55, 1.0],
         ),

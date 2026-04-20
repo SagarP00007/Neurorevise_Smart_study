@@ -3,216 +3,216 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:study_smart/core/router/route_names.dart';
 import 'package:study_smart/core/theme/app_theme.dart';
+import 'package:study_smart/core/widgets/animations.dart';
+import 'package:study_smart/core/widgets/spirograph_ring.dart';
 import 'package:study_smart/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:study_smart/features/study_items/presentation/viewmodels/revision_viewmodel.dart';
 import 'package:study_smart/features/study_items/presentation/viewmodels/study_viewmodel.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DashboardView — Matches the Kommodo "Learn Now" reference design
+// ─────────────────────────────────────────────────────────────────────────────
+
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
 
+  static const _subjects = [
+    _SubjectData('Physics',  Icons.bolt_rounded,        AppTheme.primary,   'Revise last topic'),
+    _SubjectData('Math',     Icons.calculate_rounded,    AppTheme.secondary, 'Explain a concept'),
+    _SubjectData('Biology',  Icons.biotech_rounded,      Color(0xFF30D158),  'Practice questions'),
+    _SubjectData('History',  Icons.history_edu_rounded,  AppTheme.amber,     'Learn from basics'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final authVm = context.watch<AuthViewModel>();
+    final theme   = Theme.of(context);
+    final authVm  = context.watch<AuthViewModel>();
     final studyVm = context.watch<StudyViewModel>();
-    final revVm = context.watch<RevisionViewModel>();
-    final user = authVm.currentUser;
-    final firstName = user?.displayName?.split(' ').first ?? 'Student';
+    final revVm   = context.watch<RevisionViewModel>();
+    final user    = authVm.currentUser;
+    final name    = user?.displayName?.split(' ').first ?? 'Student';
 
     return Scaffold(
+      backgroundColor: AppTheme.bgDark,
       body: SafeArea(
         child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
           slivers: [
-            // ── Header ─────────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Good morning, $firstName! 👋',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface
-                                  .withOpacity(0.6),
-                            )),
-                        const SizedBox(height: 4),
-                        Text('Study Smart',
-                            style: theme.textTheme.displaySmall),
-                      ],
-                    ),
-                    PopupMenuButton<int>(
-                      tooltip: 'Profile options',
-                      onSelected: (i) {
-                        if (i == 1) authVm.signOut();
-                      },
-                      itemBuilder: (ctx) => [
-                        PopupMenuItem(
-                          value: 0,
-                          child: Row(
-                            children: [
-                              const Icon(Icons.person_outline, size: 20),
-                              const SizedBox(width: 8),
-                              Text(user?.email ?? 'Profile'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuDivider(),
-                        PopupMenuItem(
-                          value: 1,
-                          child: Row(
-                            children: [
-                              Icon(Icons.logout_rounded,
-                                  size: 20, color: theme.colorScheme.error),
-                              const SizedBox(width: 8),
-                              Text('Logout',
-                                  style: TextStyle(
-                                      color: theme.colorScheme.error)),
-                            ],
-                          ),
-                        ),
-                      ],
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor:
-                            AppTheme.primary.withOpacity(0.15),
-                        child: user?.photoUrl != null
-                            ? ClipOval(
-                                child: Image.network(user!.photoUrl!,
-                                    fit: BoxFit.cover))
-                            : const Icon(Icons.person_rounded,
-                                color: AppTheme.primary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
 
-
-            // ── Stats Row ───────────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: Row(
-                  children: [
-                    _StatCard(
-                      label: 'Day Streak 🔥',
-                      value: '7',
-                      color: AppTheme.warning,
-                    ),
-                    const SizedBox(width: 12),
-                    _StatCard(
-                      label: 'Mins Studied',
-                      value: '142',
-                      color: AppTheme.secondary,
-                    ),
-                    const SizedBox(width: 12),
-                    _StatCard(
-                      label: 'Tasks Done',
-                      value: '5/8',
-                      color: AppTheme.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Progress Banner ─────────────────────────────────────────────
+            // ── Top bar ────────────────────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: _ProgressBanner(theme: theme),
-              ),
-            ),
-
-            // ── Due Revision Banner ──────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: _DueRevisionBanner(revVm: revVm),
-              ),
-            ),
-
-            // ── Today's Tasks ───────────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-                child: Text("Today's Tasks",
-                    style: theme.textTheme.titleLarge),
-              ),
-            ),
-
-            StreamBuilder(
-              stream: studyVm.watchDueItemsAcrossDecks(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Center(child: Text('Error loading tasks: ${snapshot.error}')),
-                    ),
-                  );
-                }
-
-                final dueItems = snapshot.data ?? [];
-
-                if (dueItems.isEmpty) {
-                  return SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 20),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            const Text('🎉', style: TextStyle(fontSize: 48)),
-                            const SizedBox(height: 16),
-                            Text("All caught up for today!", 
-                              style: theme.textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
+                child: Row(
+                  children: [
+                    // Greeting
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hello $name,',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppTheme.textSecondary),
+                          ),
+                          const SizedBox(height: 2),
+                          Text('Study Smart',
+                              style: theme.textTheme.headlineLarge),
+                        ],
                       ),
                     ),
-                  );
-                }
+                    // Avatar + settings
+                    _AvatarMenu(authVm: authVm, user: user),
+                  ],
+                ),
+              ),
+            ),
 
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final item = dueItems[index];
-                      // Find the deck name by matching ID, if loaded (otherwise fallback to generic 'Flashcard')
-                      final deckTitle = studyVm.decks.firstWhere(
-                        (d) => d.id == item.deckId, 
-                        orElse: () => throw Exception('Not found')
-                      ).title; // Safe catch below
-                      
-                      String displaySubject = 'Flashcard';
-                      try {
-                        displaySubject = studyVm.decks.firstWhere((d) => d.id == item.deckId).title;
-                      } catch (_) {}
-
-                      return _TaskTile(
-                        key: ValueKey(item.id),
-                        title: 'Review: ${item.front}',
-                        subject: displaySubject,
-                        isDone: false,
+            // ── AI Banner card ────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: FadeScaleIn(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: StreamBuilder(
+                    stream: revVm.watchDueRevisions(),
+                    builder: (ctx, snap) {
+                      final count = snap.data?.length ?? 0;
+                      return _AiBanner(
+                        dueCount: count,
+                        onTap: () => context.go(RouteNames.todayRevision),
                       );
                     },
-                    childCount: dueItems.length,
                   ),
-                );
-              },
+                ),
+              ),
+            ),
+
+            // ── Stats row ───────────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: SlideIn(
+                delay: const Duration(milliseconds: 80),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: StreamBuilder(
+                    stream: revVm.watchDueRevisions(),
+                    builder: (ctx, snap) {
+                      final count = snap.data?.length ?? 0;
+                      return Row(
+                        children: [
+                          _StatCard(
+                            label: 'Due Today',
+                            value: '$count',
+                            icon: Icons.event_available_rounded,
+                            color: AppTheme.primary,
+                          ),
+                          const SizedBox(width: 12),
+                          _StatCard(
+                            label: 'Decks',
+                            value: '${studyVm.decks.length}',
+                            icon: Icons.style_rounded,
+                            color: AppTheme.secondary,
+                          ),
+                          const SizedBox(width: 12),
+                          const _StatCard(
+                            label: 'Streak',
+                            value: '7d',
+                            icon: Icons.local_fire_department_rounded,
+                            color: AppTheme.warning,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+
+            // ── "Learn Now" heading ────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Learn Now',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text('Choose a topic and start learning smarter',
+                        style: theme.textTheme.bodySmall),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Subject rows ───────────────────────────────────────────────
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (ctx, i) => SlideIn(
+                  delay: Duration(milliseconds: 100 + i * 60),
+                  child: _SubjectRow(data: _subjects[i]),
+                ),
+                childCount: _subjects.length,
+              ),
+            ),
+
+            // ── AI Study Tip ───────────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: SlideIn(
+                delay: const Duration(milliseconds: 380),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _AiTipCard(),
+                ),
+              ),
+            ),
+
+            // ── Study Modes heading ────────────────────────────────────────
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 4),
+                child: Text('Study Modes',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700)),
+              ),
+            ),
+
+            // ── Study mode cards ───────────────────────────────────────────
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  SlideIn(
+                    delay: const Duration(milliseconds: 440),
+                    child: _StudyModeCard(
+                      icon: Icons.menu_book_rounded,
+                      title: 'Concept Explanation',
+                      subtitle: 'Learn any topic step by step',
+                      onTap: () => context.go(RouteNames.flashcards),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SlideIn(
+                    delay: const Duration(milliseconds: 500),
+                    child: _StudyModeCard(
+                      icon: Icons.science_rounded,
+                      title: 'Practice Questions',
+                      subtitle: 'Test your knowledge with MCQs',
+                      onTap: () => context.go(RouteNames.flashcards),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SlideIn(
+                    delay: const Duration(milliseconds: 560),
+                    child: _StudyModeCard(
+                      icon: Icons.repeat_rounded,
+                      title: 'Spaced Repetition',
+                      subtitle: 'Revise at the perfect moment',
+                      onTap: () => context.go(RouteNames.todayRevision),
+                    ),
+                  ),
+                ]),
+              ),
             ),
           ],
         ),
@@ -221,44 +221,225 @@ class DashboardView extends StatelessWidget {
   }
 }
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
+// ─────────────────────────────────────────────────────────────────────────────
+// Sub-widgets
+// ─────────────────────────────────────────────────────────────────────────────
 
+class _AvatarMenu extends StatelessWidget {
+  const _AvatarMenu({required this.authVm, required this.user});
+  final AuthViewModel authVm;
+  final dynamic user;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<int>(
+      tooltip: 'Profile',
+      color: AppTheme.cardHighDark,
+      onSelected: (i) { if (i == 1) authVm.signOut(); },
+      itemBuilder: (ctx) => [
+        PopupMenuItem(
+          value: 0,
+          child: Text(user?.email ?? 'Profile',
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: 1,
+          child: Text('Logout',
+              style: TextStyle(color: AppTheme.error)),
+        ),
+      ],
+      child: Container(
+        width: 42, height: 42,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppTheme.primary.withOpacity(0.15),
+          border: Border.all(
+              color: AppTheme.primary.withOpacity(0.35), width: 1.5),
+        ),
+        child: const Icon(Icons.person_rounded,
+            color: AppTheme.primary, size: 20),
+      ),
+    );
+  }
+}
+
+// AI banner with the spirograph ring
+class _AiBanner extends StatelessWidget {
+  const _AiBanner({required this.dueCount, required this.onTap});
+  final int dueCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppTheme.cardDark,
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+          border: Border.all(color: AppTheme.borderDark),
+          gradient: LinearGradient(
+            colors: [
+              AppTheme.primary.withOpacity(0.08),
+              AppTheme.cardDark,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Mini spirograph
+            SpirographRing(
+              size: 72,
+              primaryColor: AppTheme.primary,
+              secondaryColor: AppTheme.secondary,
+              strands: 7,
+              speedMs: 8000,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$dueCount cards due today',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: AppTheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap to start your revision session',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTheme.primary.withOpacity(0.15),
+                border: Border.all(color: AppTheme.primary.withOpacity(0.4)),
+              ),
+              child: const Icon(Icons.arrow_forward_rounded,
+                  color: AppTheme.primary, size: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
   const _StatCard({
     required this.label,
     required this.value,
+    required this.icon,
     required this.color,
   });
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.25)),
+          color: AppTheme.cardDark,
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          border: Border.all(color: AppTheme.borderDark),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
+            Icon(icon, color: color, size: 18),
+            const SizedBox(height: 8),
+            Text(value,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: color, fontWeight: FontWeight.w800)),
+            Text(label, style: Theme.of(context).textTheme.labelSmall),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Subject row — matches right panel of reference
+class _SubjectData {
+  const _SubjectData(this.name, this.icon, this.color, this.action);
+  final String name;
+  final IconData icon;
+  final Color color;
+  final String action;
+}
+
+class _SubjectRow extends StatelessWidget {
+  const _SubjectRow({required this.data});
+  final _SubjectData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppTheme.cardDark,
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          border: Border.all(color: AppTheme.borderDark),
+        ),
+        child: Row(
+          children: [
+            // Subject icon
+            Container(
+              width: 38, height: 38,
+              decoration: BoxDecoration(
+                color: data.color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                border: Border.all(color: data.color.withOpacity(0.25)),
+              ),
+              child: Icon(data.icon, color: data.color, size: 18),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            const SizedBox(width: 14),
+            // Subject name
+            Expanded(
+              child: Text(data.name,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            // Action chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppTheme.cardHighDark,
+                borderRadius: BorderRadius.circular(AppTheme.radiusXL),
+                border: Border.all(color: AppTheme.borderDark),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6, height: 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: data.color,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(data.action,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.textSecondary)),
+                ],
+              ),
             ),
           ],
         ),
@@ -267,218 +448,105 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Progress Banner ───────────────────────────────────────────────────────────
-class _ProgressBanner extends StatelessWidget {
-  final ThemeData theme;
-  const _ProgressBanner({required this.theme});
-
+class _AiTipCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primary, AppTheme.primaryDark],
+        color: AppTheme.cardDark,
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        border: Border.all(color: AppTheme.primary.withOpacity(0.25)),
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primary.withOpacity(0.06),
+            AppTheme.cardDark,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withOpacity(0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Weekly Goal",
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(color: Colors.white70)),
-          const SizedBox(height: 6),
-          Text("10h studied of 15h goal",
-              style: theme.textTheme.headlineSmall
-                  ?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 14),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: 10 / 15,
-              minHeight: 8,
-              backgroundColor: Colors.white24,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
+          Row(
+            children: [
+              Icon(Icons.tips_and_updates_rounded,
+                  color: AppTheme.primary, size: 18),
+              const SizedBox(width: 8),
+              Text('AI Study Tip',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.primary, fontWeight: FontWeight.w700)),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text("67% complete — keep it up! 💪",
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: Colors.white70)),
+          const SizedBox(height: 4),
+          Text('Tip of the day',
+              style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(height: 6),
+          Text(
+            '"Studying for 25 minutes with full focus improves memory retention."',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.secondary, fontStyle: FontStyle.italic, height: 1.5),
+          ),
         ],
       ),
     );
   }
 }
 
-// ── Task Tile ─────────────────────────────────────────────────────────────────
-class _TaskTile extends StatefulWidget {
-  final String title;
-  final String subject;
-  final bool isDone;
-
-  const _TaskTile({
-    super.key,
+class _StudyModeCard extends StatelessWidget {
+  const _StudyModeCard({
+    required this.icon,
     required this.title,
-    required this.subject,
-    required this.isDone,
+    required this.subtitle,
+    required this.onTap,
   });
-
-  @override
-  State<_TaskTile> createState() => _TaskTileState();
-}
-
-class _TaskTileState extends State<_TaskTile> {
-  late bool _done;
-
-  @override
-  void initState() {
-    super.initState();
-    _done = widget.isDone;
-  }
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Card(
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          leading: GestureDetector(
-            onTap: () => setState(() => _done = !_done),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 24,
-              height: 24,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppTheme.cardDark,
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          border: Border.all(color: AppTheme.borderDark),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 38, height: 38,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _done
-                    ? AppTheme.secondary
-                    : Colors.transparent,
-                border: Border.all(
-                  color: _done
-                      ? AppTheme.secondary
-                      : theme.colorScheme.onSurface.withOpacity(0.3),
-                  width: 2,
-                ),
+                color: AppTheme.primary.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(AppTheme.radiusS),
               ),
-              child: _done
-                  ? const Icon(Icons.check,
-                      size: 14, color: Colors.white)
-                  : null,
+              child: Icon(icon, color: AppTheme.primary, size: 18),
             ),
-          ),
-          title: Text(
-            widget.title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              decoration: _done ? TextDecoration.lineThrough : null,
-              color: _done
-                  ? theme.colorScheme.onSurface.withOpacity(0.4)
-                  : null,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(subtitle,
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
             ),
-          ),
-          subtitle: Text(widget.subject,
-              style: theme.textTheme.bodySmall),
-          trailing: const Icon(Icons.chevron_right_rounded, size: 18),
+            Icon(Icons.check_circle_rounded,
+                color: AppTheme.secondary.withOpacity(0.6), size: 20),
+            const SizedBox(width: 8),
+            Icon(Icons.edit_rounded,
+                color: AppTheme.primary, size: 18),
+          ],
         ),
       ),
-    );
-  }
-}
-
-// ── Due Revision Banner ───────────────────────────────────────────────────────
-/// Streams due revisions from Firestore and presents a tap-to-start card.
-/// Shows nothing while loading and hides itself when there are 0 due items.
-class _DueRevisionBanner extends StatelessWidget {
-  const _DueRevisionBanner({required this.revVm});
-
-  final RevisionViewModel revVm;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return StreamBuilder(
-      stream: revVm.watchDueRevisions(),
-      builder: (context, snapshot) {
-        // Hide while waiting or on error
-        if (!snapshot.hasData || snapshot.hasError) return const SizedBox.shrink();
-
-        final count = snapshot.data!.length;
-        if (count == 0) return const SizedBox.shrink(); // nothing due
-
-        return GestureDetector(
-          onTap: () => context.push(RouteNames.todayRevision),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.secondary,
-                  AppTheme.secondary.withOpacity(0.75),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.secondary.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.style_outlined,
-                      color: Colors.white, size: 22),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$count card${count == 1 ? '' : 's'} due today',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'Tap to start your revision session',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward_ios_rounded,
-                    color: Colors.white70, size: 16),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }
